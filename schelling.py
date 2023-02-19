@@ -1,6 +1,7 @@
 """Schelling's model of segregation"""
 
-from typing import Union, List
+import random
+from typing import List, Union
 
 import numpy as np
 
@@ -45,7 +46,7 @@ class Schelling:
         groups: Union[int, List[float]] = 2,
         thresholds: Union[float, List[float]] = 0.5,
         pct_empty: float = 0.25,
-        n_neighbours: int = 2,
+        n_neighbours: int = 1,
     ) -> None:
         assert population > 0, "population must be a positive integer"
         self.population = population
@@ -90,17 +91,38 @@ class Schelling:
         self.map = np.reshape(self.homes, (self.length, self.length))
 
     def run(self):
-        ...
+        for (r, c), group in np.ndenumerate(self.map):
+            if group != 0:
+                neighbourhood = self._get_neighbourhood(r, c)
+                size = np.size(neighbourhood)
+                n_empty = len(np.where(neighbourhood == 0)[0])
+                if size != n_empty + 1:
+                    n_same = len(np.where(neighbourhood == group)[0]) - 1
+                    similarity = n_same / (size - n_empty - 1.0)
+                    if similarity < self.thresholds[group]:
+                        empty = list(
+                            zip(np.where(self.map == 0)[0], np.where(self.map == 0)[1])
+                        )
+                        selected = random.choice(empty)
+                        self.map[selected] = group
+                        self.map[r, c] = 0
 
+    def mean_similarity_score(self):
+        count = 0
+        similarity = 0
+        for (r, c), group in np.ndenumerate(self.map):
+            if group != 0:
+                neighbourhood = self._get_neighbourhood(r, c)
+                size = np.size(neighbourhood)
+                n_empty = len(np.where(neighbourhood == 0)[0])
+                if size != n_empty + 1:
+                    n_same = len(np.where(neighbourhood == group)[0]) - 1
+                    similarity += n_same / (size - n_empty - 1.0)
+                    count += 1
+        return similarity / count
 
-if __name__ == "__main__":
-    s = Schelling(
-        36,
-        groups=[0.3, 0.2, 0.1],
-        thresholds=[0.21134, 0.3, 0.1],
-        pct_empty=0.15,
-    )
-    print(s.groups)
-    print(s.thresholds)
-    print(s.pct_empty)
-    print(s.map)
+    def _get_neighbourhood(self, row, col):
+        return self.map[
+            max(row - self.n_neighbours, 0) : row + self.n_neighbours + 1,
+            max(col - self.n_neighbours, 0) : col + self.n_neighbours + 1,
+        ]
