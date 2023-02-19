@@ -86,7 +86,9 @@ class Schelling:
         # Initialise map
         self.length = int(np.sqrt(self.population))
         self.homes = np.random.choice(
-            [n for n in range(len(groups) + 1)], size=self.length**2, p=self.groups
+            [n for n in range(len(self.groups))],
+            size=self.length**2,
+            p=self.groups,
         )
         self.map = np.reshape(self.homes, (self.length, self.length))
 
