@@ -93,7 +93,13 @@ class Schelling:
         self.map = np.reshape(self.homes, (self.length, self.length))
 
     def run(self):
-        for (r, c), group in np.ndenumerate(self.map):
+        map_copy = np.copy(self.map)  # ensure home moves only once per iteration
+        cells = np.array(range(0, len(self.homes)))
+        np.random.shuffle(cells)
+        for cell_number in cells:
+            r = cell_number // self.length
+            c = cell_number % self.length
+            group = map_copy[r, c]
             if group != 0:
                 neighbourhood = self._get_neighbourhood(r, c)
                 size = np.size(neighbourhood)
