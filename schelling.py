@@ -24,6 +24,11 @@ class Schelling:
         groups. A list of floats can be provided to specify the similarity thresholds
         for each group individually. If a list of floats is provided, it must be of
         equal length to the number of groups.
+        Thresholds are percentages, with values between -1.00 an 1.00. A negative
+        threshold is interpreted as a "diversity-seeking" group. That is, rather than
+        moving when their neighbourhood has similarity below their absolute threshold
+        value (as per the conventional Schelling segregation model), they move when
+        their neigbourhood has similarity above their absolute threshold value.
     pct_empty : float
         The percentage of homes that are empty. This attribute will be overwritten if
         `groups` is provided a list of floats.
@@ -68,13 +73,13 @@ class Schelling:
 
         if isinstance(thresholds, float):
             assert (
-                thresholds > 0 and thresholds < 1
+                thresholds >= -1 and thresholds <= 1
             ), "Threshold must be between 0 and 1"
             self.thresholds = [thresholds for _ in self.groups]
         else:
-            assert sum([v > 0 and v < 1 for v in thresholds]) == len(
+            assert sum([v >= -1 and v <= 1 for v in thresholds]) == len(
                 thresholds
-            ), "Threshold values must be between 0 and 1"
+            ), "Threshold values must be between -1 and 1"
             assert (
                 len(thresholds) == len(self.groups) - 1
             ), "The count of threshold values must match the count of groups"
@@ -107,6 +112,8 @@ class Schelling:
                 if size != n_empty + 1:
                     n_same = len(np.where(neighbourhood == group)[0]) - 1
                     similarity = n_same / (size - n_empty - 1.0)
+                    if self.thresholds[group] < 0:
+                        similarity *= -1  # for diversity-seeking groups
                     if similarity < self.thresholds[group]:
                         empty = list(
                             zip(np.where(self.map == 0)[0], np.where(self.map == 0)[1])
