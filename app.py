@@ -53,6 +53,13 @@ def plot():
     cmap = ListedColormap([colours[i] for i in range(n_groups + 1)])
     ax[0].pcolor(schelling.map, cmap=cmap, edgecolors="w", linewidths=1)
     ax[0].axis("off")
+    legend_elements = [
+        Patch(
+            facecolor=colours[i + 1], label=f"Group {i+1} (threshold={thresholds[i]})"
+        )
+        for i in range(n_groups)
+    ]
+    ax[0].legend(handles=legend_elements, loc=(0, n_groups * -0.06))
 
     # similarity score plot
     ax[1].set_xlabel("iteration")
