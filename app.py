@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 from matplotlib.colors import ListedColormap
+from matplotlib.patches import Patch
 
 from schelling import Schelling
 
@@ -14,8 +15,10 @@ st.title("Schelling's Model of Segregation")
 
 population = st.sidebar.slider("Number of homes", 100, 10_000, 2500)
 n_groups = st.sidebar.number_input("Number of groups", 2)
+thresholds = []
+for g in range(n_groups):
+    thresholds.append(st.sidebar.slider(f"Threshold Group {g+1}", -1.0, 1.0, 0.4))
 pct_empty = st.sidebar.slider("Percent of homes that are empty", 0.01, 0.99, 0.2)
-threshold = st.sidebar.slider("Threshold", 0.0, 1.0, 0.4)
 n_iterations = st.sidebar.number_input("Number of iterations", 10)
 n_neighbours = st.sidebar.number_input("Depth of neighbourhood to consider", 1)
 
@@ -24,7 +27,7 @@ n_neighbours = st.sidebar.number_input("Depth of neighbourhood to consider", 1)
 schelling = Schelling(
     population,
     groups=n_groups,
-    thresholds=threshold,
+    thresholds=thresholds,
     pct_empty=pct_empty,
     n_neighbours=n_neighbours,
 )
