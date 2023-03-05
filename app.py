@@ -1,18 +1,14 @@
 """Streamlit app for Schelling's model of segregation"""
 
-import matplotlib.pyplot as plt
 import streamlit as st
-from matplotlib.colors import ListedColormap
-from matplotlib.patches import Patch
 
+from plots import plot_map_and_similarity_score, plot_thresholds
 from schelling import Schelling
 
-plt.style.use("style.mplstyle")
-
 # Streamlit App
-
 st.title("Schelling's Model of Segregation")
 
+# configurables
 population = st.sidebar.slider("Number of homes", 100, 10_000, 2500)
 n_groups = st.sidebar.number_input("Number of groups", 2, 8)
 thresholds = []
@@ -22,8 +18,7 @@ pct_empty = st.sidebar.slider("Percent of homes that are empty", 0.01, 0.99, 0.2
 n_iterations = st.sidebar.number_input("Number of iterations", 10)
 n_neighbours = st.sidebar.number_input("Depth of neighbourhood to consider", 1)
 
-
-# Instantiate Schelling's model of segregation
+# instantiate Schelling's model of segregation
 schelling = Schelling(
     population,
     groups=n_groups,
@@ -31,58 +26,48 @@ schelling = Schelling(
     pct_empty=pct_empty,
     n_neighbours=n_neighbours,
 )
+
+# track mean similarity scores
 mean_similarity_score = []
 mean_similarity_score.append(schelling.mean_similarity_score())
 
+# track threshold values
+threshold_vals = []
+for threshold in schelling.thresholds[1:]:
+    threshold_vals.append([threshold])
 
-def plot():
-    plt.close()
-    fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+# plot map and similarity score
+fig_map, ax_map = plot_map_and_similarity_score(
+    schelling, mean_similarity_score, n_iterations
+)
+plots_top = st.pyplot(fig_map)
 
-    # map plot
-    colours = [
-        "white",
-        "#003f5c",
-        "#d45087",
-        "#ffa600",
-        "#665191",
-        "#ff7c43",
-        "#2f4b7c",
-        "#f95d6a",
-        "#a05195",
-    ]
-    cmap = ListedColormap([colours[i] for i in range(n_groups + 1)])
-    ax[0].pcolor(schelling.map, cmap=cmap, edgecolors="w", linewidths=1)
-    ax[0].axis("off")
-    legend_elements = [
-        Patch(
-            facecolor=colours[i + 1], label=f"Group {i+1} (threshold={thresholds[i]})"
-        )
-        for i in range(n_groups)
-    ]
-    ax[0].legend(handles=legend_elements, loc=(0, n_groups * -0.06))
+# plot thresholds
+fig_thresholds, ax_thresholds = plot_thresholds(threshold_vals, n_iterations)
+plot_bottom = st.pyplot(fig_thresholds)
 
-    # similarity score plot
-    ax[1].set_xlabel("iteration")
-    ax[1].set_xlim([0, n_iterations])
-    ax[1].set_ylim([0, 1])
-    ax[1].set_title("Mean Similarity Score")
-    ax[1].plot(range(1, len(mean_similarity_score) + 1), mean_similarity_score)
-    ax[1].text(
-        1, 0.95, f"Similarity Ratio: {mean_similarity_score[-1]:.4f}", fontsize=10
-    )
-    ax[1].grid()
-    return fig, ax
-
-
-fig, ax = plot()
-plots = st.pyplot(fig)
+# plot progress
 progress_bar = st.progress(0)
 
+# run model
 if st.sidebar.button("Run"):
     for i in range(n_iterations):
         schelling.run()
+
+        # update mean similarity scores and thresholds
         mean_similarity_score.append(schelling.mean_similarity_score())
-        fig, ax = plot()
-        plots.pyplot(fig)
+        for g, t in enumerate(schelling.thresholds[1:]):
+            threshold_vals[g].append(t)
+
+        # plot map and similarity score
+        fig_map, ax_map = plot_map_and_similarity_score(
+            schelling, mean_similarity_score, n_iterations
+        )
+        plots_top.pyplot(fig_map)
+
+        # plot thresholds
+        fig_thresholds, ax_thresholds = plot_thresholds(threshold_vals, n_iterations)
+        plot_bottom.pyplot(fig_thresholds)
+
+        # plot progress
         progress_bar.progress((i + 1.0) / n_iterations)
