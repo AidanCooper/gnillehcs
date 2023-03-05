@@ -14,7 +14,7 @@ plt.style.use("style.mplstyle")
 st.title("Schelling's Model of Segregation")
 
 population = st.sidebar.slider("Number of homes", 100, 10_000, 2500)
-n_groups = st.sidebar.number_input("Number of groups", 2)
+n_groups = st.sidebar.number_input("Number of groups", 2, 8)
 thresholds = []
 for g in range(n_groups):
     thresholds.append(st.sidebar.slider(f"Threshold Group {g+1}", -1.0, 1.0, 0.4))
@@ -36,6 +36,7 @@ mean_similarity_score.append(schelling.mean_similarity_score())
 
 
 def plot():
+    plt.close()
     fig, ax = plt.subplots(1, 2, figsize=(16, 6))
 
     # map plot
