@@ -113,8 +113,8 @@ class Schelling:
                     n_same = len(np.where(neighbourhood == group)[0]) - 1
                     similarity = n_same / (size - n_empty - 1.0)
                     if self.thresholds[group] < 0:
-                        similarity *= -1  # for diversity-seeking groups
-                    if similarity < self.thresholds[group]:
+                        similarity = 1 - similarity  # for diversity-seeking groups
+                    if similarity < abs(self.thresholds[group]):
                         empty = list(
                             zip(np.where(self.map == 0)[0], np.where(self.map == 0)[1])
                         )
