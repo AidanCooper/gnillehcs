@@ -1,3 +1,5 @@
-# Schelling's Model of Segregation
+# Gnillehcs' Model of Integration
 
-Python implementation of Schelling's model of segregation. Code extended from [this GitHub repo](https://github.com/adilmoujahid/streamlit-schelling).
+Full write up: [Gnillehcs' Model of Integration](aidancooper.co.uk/gnillehcs)
+
+Python implementation of Schelling's model of segregation extended from [this GitHub repo](https://github.com/adilmoujahid/streamlit-schelling) ([article](http://adilmoujahid.com/posts/2020/05/streamlit-python-schelling/)).
