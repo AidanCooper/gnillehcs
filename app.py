@@ -7,7 +7,7 @@ from schelling import Schelling
 from help import dynamic_help, threshold_help, n_neighbours_help, htl_help
 
 # Streamlit App
-st.title("Schelling's Model of Segregation")
+st.title("Gnillehcs' Model of Integration")
 
 # configurables
 population = st.sidebar.slider("Number of homes", 100, 10_000, 2500)
